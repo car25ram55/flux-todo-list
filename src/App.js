@@ -1,23 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import TodoStore from "./stores/TodoStore";
+import TodoActions from "./actions/TodoActions";
 
 function App() {
+  const [todos, setTodos] = useState(TodoStore.getTodos());
+
+  useEffect(() => {
+    const onChange = () => setTodos(TodoStore.getTodos());
+    TodoStore.addChangeListener(onChange);
+
+    return () => {
+      TodoStore.removeChangeListener(onChange);
+    };
+  }, []);
+
+  const addTodo = (text) => {
+    TodoActions.addTodo(text);
+  };
+
+  const deleteTodo = (id) => {
+    TodoActions.deleteTodo(id);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <input
+        type="text"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            addTodo(e.target.value);
+            e.target.value = "";
+          }
+        }}
+      />
+
+      <ul>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            {todo.text}
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
